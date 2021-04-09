@@ -7,7 +7,7 @@ const airline_report_dynamicModel = require('./airline_report_dynamic');
 
 const flightsArr = require('./airline-data');
 const moment = require('moment');
-const generateExcelFile = require('./app2');
+// const generateExcelFile = require('./app2');
 
 const wait = 1000 * 60 * 5;
 const commonTrunk = async (browser, flightCode) => {
@@ -248,13 +248,13 @@ const saveSheetsData = async (scrapeDate) => {
       const distance = domesticAirlines[ii].distance;
       const query1 = Object.assign(
         {},
-        { departureDate: '2021-04-09', airline: airline, scrapeDate: scrapeDate },
+        { departureDate: '2021-07-02', airline: airline, scrapeDate: scrapeDate },
         findCarriers(carrier.en)
       );
 
       const query7 = Object.assign(
         {},
-        { departureDate: '2021-04-16', airline: airline, scrapeDate: scrapeDate },
+        { departureDate: '2021-08-06', airline: airline, scrapeDate: scrapeDate },
         findCarriers(carrier.en)
       );
       // const query14 = Object.assign(
@@ -884,7 +884,7 @@ const getFlightInfoFromFlightAra = async (browser, { flightno }) => {
   };
 };
 
-const scrape = async () => {
+const scrape = async (from) => {
   const today = `${getToday()}`;
   const scrapeDate = moment().format('YYYY-MM-DD');
   const day1 = 1;
@@ -899,10 +899,10 @@ const scrape = async () => {
   // const _15DayFormatter = moment().add(day15, 'days').format('MM/DD/YYYY');
 
   const daysArr = [
-    { departureDate: '2021-04-09', type: '-1', formatterDate: '04/09/2021' },
-    { departureDate: '2021-04-16', type: '-1', formatterDate: '04/16/2021' },
-    { departureDate: '2021-04-23', type: '-1', formatterDate: '04/23/2021' },
-    { departureDate: '2021-05-14', type: '-1', formatterDate: '05/14/2021' },
+    { departureDate: '2021-07-02', type: '-1', formatterDate: '07/02/2021' },
+    { departureDate: '2021-08-06', type: '-1', formatterDate: '08/06/2021' },
+    // { departureDate: '2021-04-23', type: '-1', formatterDate: '04/23/2021' },
+    // { departureDate: '2021-05-14', type: '-1', formatterDate: '05/14/2021' },
     // { departureDate: _8Day, type: '-2', formatterDate: _8DayFormatter },
     // { departureDate: _15Day, type: '-3', formatterDate: _15DayFormatter },
   ];
@@ -923,7 +923,7 @@ const scrape = async () => {
   // const longHaulEuropeFlights = [...flightsArr].filter((v) => v.zoneCode == 3);
   // const longHaulUSFlights = [...flightsArr].filter((v) => v.zoneCode == 4);
 
-  const doDomesticAirlines = async () => {
+  const doDomesticAirlines = async (from) => {
     let browser = await puppeteer.launch({
       executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
       headless: false,
@@ -937,8 +937,8 @@ const scrape = async () => {
       width: 1280,
       height: 768,
     });
-    // await page.authenticate('a534561', '19821013rr;;');
-    for (let i = 0, l = domesticFlights.length; i < l; i++) {
+    await page.authenticate('a534561', '19821013rr;;');
+    for (let i = from, l = domesticFlights.length; i < l; i++) {
       console.log('');
       log(
         `--------------- [ ${domesticFlights[i].airlineCN} ] step: ${i}/${domesticFlights.length} ---------------`
@@ -1177,7 +1177,7 @@ const scrape = async () => {
   };
 
   log(`---- Domestic airlines ----`);
-  await doDomesticAirlines();
+  await doDomesticAirlines(from);
   log(`---- Domestic airlines scraped! ----`);
 
   log(`---- Short-haul airlines ----`);
@@ -1209,7 +1209,7 @@ const scrape = async () => {
 // cron.schedule('0 01 00 * * 4', async () => {
 //   const scrapeDate = moment().format('YYYY-MM-DD');
 //   await scrape();
-//   await generateExcelFile(scrapeDate);
+// await generateExcelFile(scrapeDate);
 //   log(`${scrapeDate}'s data scraped！`);
 // });
 
@@ -1294,14 +1294,13 @@ const exportExcel = async () => {
       // _20210514: payload._20210514,
     }))
   );
-  await workbook.xlsx.writeFile(`Price-Tracker3.xlsx`);
+  await workbook.xlsx.writeFile(`Price-Tracker-0702-0806.xlsx`);
 };
 
 (async () => {
   const scrapeDate = moment().format('YYYY-MM-DD');
-  await scrape();
+  await scrape(0);
   await saveSheetsData(scrapeDate);
-  await generateExcelFile(scrapeDate);
   await exportExcel();
   log(`${scrapeDate}'s data scraped！`);
 })();
