@@ -1,0 +1,22 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "cSpell.ignoreWords": [
+    "cookiz",
+    "cyclocross",
+    "devserver",
+    "exceljs",
+    "handl",
+    "handle",
+    "iamadev",
+    "loglevel",
+    "nginx",
+    "nuxt",
+    "nuxtjs",
+    "sweetalert",
+    "web",
+    "womens"
+  ]
+}

@@ -1,0 +1,2 @@
+mongoexport --uri="mongodb://127.0.0.1/research" --collection=airlines --out=airlines.json
+mongoexport --uri="mongodb://127.0.0.1/research" --collection=flights --out=flights.json
