@@ -1,7 +1,8 @@
 const puppeteer = require('puppeteer');
 const Excel = require('exceljs');
-const flightModel = require('./flight');
+const db = require('./db');
 
+const flightModel = require('./flight');
 const airline_dynamicModel = require('./airline_dynamic');
 const airline_report_dynamicModel = require('./airline_report_dynamic');
 
@@ -587,7 +588,7 @@ const saveSheetsData = async (scrapeDate) => {
       //       Math.pow(10, 6)
       //     : 0;
 
-      const ASK = nextDayASK + _14DayASK; //+ _7DayASK + _15DayASK;
+      const ASK = nextDayASK + _7DayASK; //+ _7DayASK + _15DayASK;
       await airline_report_dynamicModel.airline_report_dynamic.createData({
         weekly: weekly,
         airline: airline,
@@ -890,13 +891,6 @@ const scrape = async (from) => {
   const day1 = 1;
   const day8 = 8;
   const day15 = 15;
-  // const _nextDay = moment().add(day1, 'days').format('YYYY-MM-DD');
-  // const _8Day = moment().add(day8, 'days').format('YYYY-MM-DD');
-  // const _15Day = moment().add(day15, 'days').format('YYYY-MM-DD');
-
-  // const _nextDayFormatter = moment().add(day1, 'days').format('MM/DD/YYYY');
-  // const _8DayFormatter = moment().add(day8, 'days').format('MM/DD/YYYY');
-  // const _15DayFormatter = moment().add(day15, 'days').format('MM/DD/YYYY');
 
   const daysArr = [
     { departureDate: '2021-07-02', type: '-1', formatterDate: '07/02/2021' },
@@ -907,21 +901,7 @@ const scrape = async (from) => {
     // { departureDate: _15Day, type: '-3', formatterDate: _15DayFormatter },
   ];
 
-  // let page = await browser.newPage();
-  // page.setUserAgent(
-  //   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
-  // );
-  // page.setViewport({
-  //   width: 1280,
-  //   height: 768,
-  // });
-
-  // await page.authenticate('a534561', '19821013rrr;;');
-
   const domesticFlights = [...flightsArr].filter((v) => v.zoneCode == 1);
-  // const shortHaulAsiaFlights = [...flightsArr].filter((v) => v.zoneCode == 2);
-  // const longHaulEuropeFlights = [...flightsArr].filter((v) => v.zoneCode == 3);
-  // const longHaulUSFlights = [...flightsArr].filter((v) => v.zoneCode == 4);
 
   const doDomesticAirlines = async (from) => {
     let browser = await puppeteer.launch({
@@ -957,17 +937,6 @@ const scrape = async (from) => {
         } catch (e) {
           continue;
         }
-        // try {
-        //   await page.waitForSelector('.basic-alert.basic-alert-with-icon .btn', {
-        //     timeout: wait,
-        //   });
-        //   log('tap alert button');
-        //   await page.tap('.basic-alert.basic-alert-with-icon .btn');
-        // } catch (e) {
-        //   log('no alert button');
-        //   continue;
-        // }
-        // document.querySelector('.pop_bd .button')
         await sleep(3000);
         await autoScroll(page);
         const list = await page.evaluate(() => {
@@ -1070,9 +1039,6 @@ const scrape = async (from) => {
           });
           if (data && data.length > 0) {
             flightInfo = data[0];
-            // log(
-            //   `${item.flightCode} found in database ${flightInfo.aircraft} | ${flightInfo.aircraftFullName} | ${flightInfo.formatAircraft} seats:  ${flightInfo.economySeats}`
-            // );
           } else {
             const data = await flightModel.flight.getData({
               carrier: item.carrier,
@@ -1080,28 +1046,9 @@ const scrape = async (from) => {
             });
             if (data && data.length > 0) {
               flightInfo = data[0];
-              // log(
-              //   `${item.flightCode} found similar aircraft in database ${flightInfo.aircraft} | ${flightInfo.aircraftFullName} | ${flightInfo.formatAircraft} seats:  ${flightInfo.economySeats}`
-              // );
             } else {
               log(`${item.flightCode} not found in database`);
-              // if (carrierMap[item.carrier]) {
-              //   flightInfo = await getFlightInfoFromSeatGuru(browser, {
-              //     carrier: carrierMap[item.carrier],
-              //     date: daysArr[ii].formatterDate,
-              //     flightno: item.flightCode.replace(item.carrier, ''),
-              //   });
-              //   if (!flightInfo) {
-              //     log(`${item.flightCode} not found in seatguru.com go to flightare.com`);
-              //     flightInfo = await commonTrunk(browser, item.flightCode);
-              //   } else {
-              //     log(
-              //       `${item.flightCode} found in seatguru.com seats:  ${flightInfo.economySeats}`
-              //     );
-              //   }
-              // } else {
               flightInfo = await commonTrunk(browser, item.flightCode);
-              // }
             }
 
             await flightModel.flight.createData({
@@ -1163,12 +1110,9 @@ const scrape = async (from) => {
             economySeats: flightInfo.economySeats,
             economySeatsStr: flightInfo.economySeatsStr,
           });
-          // log(
-          //   `${item.flightCode} - ${flightInfo.aircraftFullName} -${item.carrierCN} - ${flightInfo.economySeatsStr} scraped`
-          // );
         }
 
-        let timer = getRandom(1000 * 3, 6 * 1000);
+        let timer = getRandom(1000 * 30, 60 * 1000);
         log(`sleep ${timer / 1000} seconds!`);
         await sleep(timer);
       }
@@ -1290,8 +1234,6 @@ const exportExcel = async () => {
       scrapeDate: payload.scrapeDate,
       _20210702: payload._20210702,
       _20210806: payload._20210806,
-      // _20210423: payload._20210423,
-      // _20210514: payload._20210514,
     }))
   );
   await workbook.xlsx.writeFile(`Price-Tracker-0702-0806.xlsx`);
