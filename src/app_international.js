@@ -1112,7 +1112,7 @@ const scrape = async (from) => {
           });
         }
 
-        let timer = getRandom(1000 * 30, 60 * 1000);
+        let timer = getRandom(1000 * 5, 10 * 1000);
         log(`sleep ${timer / 1000} seconds!`);
         await sleep(timer);
       }
@@ -1241,7 +1241,7 @@ const exportExcel = async () => {
 
 (async () => {
   const scrapeDate = moment().format('YYYY-MM-DD');
-  await scrape(0);
+  await scrape(44);
   await saveSheetsData(scrapeDate);
   await exportExcel();
   log(`${scrapeDate}'s data scraped！`);
